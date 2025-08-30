@@ -1,0 +1,390 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EVOSGPT</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      background: #f5f7fa;
+    }
+
+    /* Sidebar */
+    #sidebar {
+      width: 220px;
+      background: #222;
+      color: white;
+      position: fixed;
+      top: 0;
+      left: -220px; /* Hidden by default */
+      height: 100%;
+      transition: 0.3s;
+      padding-top: 60px;
+      z-index: 1001;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    #sidebar a {
+      display: block;
+      padding: 12px;
+      color: white;
+      text-decoration: none;
+    }
+    #sidebar a:hover {
+      background: #00d4ff;
+    }
+
+    /* Sidebar overlay for mobile */
+    #sidebar.active {
+      left: 0;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.4);
+    }
+
+    /* Dimmed overlay behind sidebar */
+    #overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      z-index: 1000;
+    }
+    #overlay.active {
+      display: block;
+    }
+
+    /* System Notices inside sidebar */
+    #system-notices {
+      border-top: 1px solid #444;
+      padding: 10px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    #system-notices h3 {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #00d4ff;
+    }
+    .notice {
+      padding: 6px 10px;
+      margin: 5px 0;
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .notice.info {
+      background: #e3f2fd;
+      color: #0277bd;
+    }
+    .notice.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .notice.warning {
+      background: #fff3e0;
+      color: #ef6c00;
+    }
+    .notice.critical {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    /* Top bar */
+    header {
+      position: fixed;
+      width: 100%;
+      top: 0;
+      left: 0;
+      background: #00d4ff;
+      color: white;
+      padding: 12px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-direction: column; /* stack title + button */
+      z-index: 999;
+    }
+    header .menu-btn {
+      cursor: pointer;
+      font-size: 22px;
+      align-self: flex-start;
+    }
+    header h1 {
+      margin: 5px 0;
+      font-size: 18px;
+      text-align: center;
+      flex: 1;
+    }
+
+    /* Auth links in header */
+    .auth-links a {
+      color: white;
+      margin-left: 15px;
+      text-decoration: none;
+      font-weight: normal;
+    }
+
+    /* Upgrade button inside header */
+    #upgrade-btn {
+      margin-top: 5px;
+      background: #ff9800;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+      box-shadow: 0px 3px 5px rgba(0,0,0,0.2);
+      animation: bounce 2s infinite;
+    }
+    #upgrade-btn:hover {
+      background: #e68900;
+    }
+
+    /* Bounce animation */
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-5px); }
+      60% { transform: translateY(-3px); }
+    }
+
+    /* Chat area */
+    #chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      margin-top: 90px; /* space for header + button */
+      width: 100%;
+      position: relative;
+    }
+
+    #chat-box {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      transition: scrollbar-color 0.3s ease;
+      background: #f5f7fa;
+    }
+
+    .msg {
+      max-width: 70%;
+      margin: 6px 0;
+      padding: 10px 14px;
+      border-radius: 10px;
+      line-height: 1.4;
+    }
+    .user {
+      background: #00d4ff;
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 0;
+    }
+    .bot {
+      background: #fff;
+      color: #333;
+      align-self: flex-start;
+      border-bottom-left-radius: 0;
+      border: 1px solid #ddd;
+    }
+
+    form {
+      display: flex;
+      padding: 10px;
+      background: white;
+      border-top: 1px solid #ccc;
+    }
+    input[type=text] {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      padding: 10px 15px;
+      margin-left: 8px;
+      background: #00d4ff;
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* Custom scrollbar */
+    #chat-box::-webkit-scrollbar {
+      width: 8px;
+    }
+    #chat-box::-webkit-scrollbar-thumb {
+      background: #bbb;
+      border-radius: 4px;
+    }
+    #chat-box.hidden-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Scrollbar toggle button */
+    #scroll-toggle {
+      position: absolute;
+      right: 10px;
+      bottom: 65px;
+      background: #00d4ff;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px; height: 40px;
+      cursor: pointer;
+      font-size: 18px;
+      z-index: 999;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 16px;
+      }
+      #chat-container {
+        margin-top: 100px;
+      }
+      #sidebar {
+        width: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div>
+      <a href="javascript:void(0)" onclick="toggleSidebar()">⬅ Back</a>
+      <a href="/">💬 Chat</a>
+      <a href="/upgrade">⚡ Upgrade</a>
+      <a href="/analytics">📊 Analytics</a>
+      <a href="/logs">📜 Logs</a>
+           <a href="/admin">🛠 Admin Dashboard</a>
+          <a href="/login">🔑 Login</a>
+        <a href="/register">📝 Register</a>
+        <a href="/logout">🚪 Logout</a>
+       </div>
+
+    <!-- System Notices -->
+    <div id="system-notices">
+      <h3>📢 System Notices</h3>
+              <div class="notice"> </div>
+        
+        <div class="notice info">No active notices.</div>
+       </div>
+  </div>
+  <div id="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Header -->
+  <header>
+    <div style="display:flex; width:100%; align-items:center; justify-content:space-between;">
+      <span class="menu-btn" onclick="toggleSidebar()">☰</span>
+      <h1>EVOSGPT {{ icon }} {{ tier }} Mode</h1>
+      <div class="auth-links">
+                 <a href="/login">🔑 Login</a>
+          <a href="/register">📝 Register</a>
+                 <a href="/logout">🚪 Logout</a>
+              </div>
+    </div>
+         <button id="upgrade-btn" onclick="location.href='/upgrade'">⚡ Upgrade Tier</button>
+    </header>
+
+  <!-- Chat container -->
+  <div id="chat-container">
+    <div id="chat-box">
+     
+        <div class="msg user"></div>
+        <div class="msg bot"></div>
+         <div class="msg user"></div>
+        <div class="msg bot"></div>
+         </div>
+
+    <!-- Scrollbar toggle button -->
+    <button id="scroll-toggle">📜</button>
+
+    <form id="chat-form" method="POST">
+      <input type="text" id="message" name="message" placeholder="Type your message..." required>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <script>
+    // Sidebar toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("overlay");
+      sidebar.classList.toggle("active");
+      overlay.classList.toggle("active");
+    }
+
+    // Chat auto-scroll
+    const chatBox = document.getElementById("chat-box");
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Scrollbar toggle
+    const toggleBtn = document.getElementById("scroll-toggle");
+    toggleBtn.addEventListener("click", () => {
+      chatBox.classList.toggle("hidden-scrollbar");
+      toggleBtn.textContent = chatBox.classList.contains("hidden-scrollbar") ? "↕" : "📜";
+    });
+
+    // Chat form submit
+    const form = document.getElementById("chat-form");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = document.getElementById("message");
+      const userMsg = input.value;
+      input.value = "";
+
+      const div = document.createElement("div");
+      div.classList.add("msg", "user");
+      div.innerHTML = userMsg;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      // Send message to server
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMsg })
+      });
+      const data = await res.json();
+
+      const botDiv = document.createElement("div");
+      botDiv.classList.add("msg", "bot");
+      botDiv.innerHTML = data.reply;
+      chatBox.appendChild(botDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    //Load system notice dynamically//
+    async function loadNotices() {
+  const res = await fetch("/system_notices");
+  const data = await res.json();
+  const container = document.getElementById("system-notices");
+  container.innerHTML = "<h3>📢 System Notices</h3>";
+  if (data.length === 0) {
+    container.innerHTML += '<div class="notice info">No active notices.</div>';
+  } else {
+    data.forEach(note => {
+      container.innerHTML += `<div class="notice ${note.type}">${note.msg}</div>`;
+    });
+  }
+}
+loadNotices();
+setInterval(loadNotices, 30000); // refresh every 30s
+
+  </script>
+</body>
+</html>
