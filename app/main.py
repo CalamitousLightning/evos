@@ -1,12 +1,51 @@
 from fastapi import FastAPI
-from .database import engine, Base
+from sqlalchemy.orm import Session
+
+from .database import engine, Base, SessionLocal
+from .models import User
+from .auth import hash_password
+from .routes import auth_routes
 
 app = FastAPI(
     title="EVOS Data Services API",
     version="1.0"
 )
 
+# Create database tables
 Base.metadata.create_all(bind=engine)
+
+# Register routes
+app.include_router(auth_routes.router)
+
+
+def create_founder():
+    db: Session = SessionLocal()
+
+    try:
+        founder = db.query(User).filter(User.role == "founder").first()
+
+        if not founder:
+            founder_user = User(
+                username="founder",
+                full_name="EVOS Founder",
+                phone="0000000000",
+                password_hash=hash_password("ChangeThisPassword123"),
+                role="founder",
+                status="active"
+            )
+
+            db.add(founder_user)
+            db.commit()
+
+    finally:
+        db.close()
+
+
+# Run founder creation when server starts
+@app.on_event("startup")
+def startup_event():
+    create_founder()
+
 
 @app.get("/")
 def root():
