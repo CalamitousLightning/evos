@@ -29,7 +29,7 @@ def create_founder():
                 username="founder",
                 full_name="EVOS Founder",
                 phone="0000000000",
-                password_hash=hash_password("ChangeThisPassword123"),
+                password_hash=hash_password("Evos123"),
                 role="founder",
                 status="active"
             )
