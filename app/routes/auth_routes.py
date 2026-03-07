@@ -4,6 +4,13 @@ from ..database import get_db
 from ..models import User
 from ..schemas import UserCreate
 from ..auth import hash_password
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models import User
+from app.auth import hash_password
+
+router = APIRouter(prefix="/auth")
 
 router = APIRouter()
 
@@ -52,13 +59,6 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         "username": db_user.username
     }
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from app.database import get_db
-from app.models import User
-from app.auth import hash_password
-
-router = APIRouter(prefix="/auth")
 
 @router.post("/register")
 def register(username: str, full_name: str, phone: str, password: str, invited_by: str = None, db: Session = Depends(get_db)):
