@@ -53,3 +53,29 @@ def update_order_status(
     db.commit()
 
     return {"message": "Order status updated", "status": status}
+
+@router.get("/agent-dashboard/{agent_id}")
+def agent_dashboard(agent_id: int, db: Session = Depends(get_db)):
+
+    orders = db.query(Order).filter(Order.agent_id == agent_id).all()
+
+    total_orders = len(orders)
+
+    successful_orders = len([o for o in orders if o.status == "successful"])
+
+    pending_orders = len([o for o in orders if o.status == "pending"])
+
+    failed_orders = len([o for o in orders if o.status == "failed"])
+
+    earnings = sum(o.amount for o in orders if o.status == "successful")
+
+    return {
+        "total_orders": total_orders,
+        "successful_orders": successful_orders,
+        "pending_orders": pending_orders,
+        "failed_orders": failed_orders,
+        "earnings": earnings
+    }
+
+
+
