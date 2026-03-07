@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from ..database import SessionLocal
-from ..models.transaction import Transaction
-from ..schemas.transaction_schema import TransactionCreate
+from ..models import Transaction
+from ..schemas import TransactionCreate
 from ..auth import get_current_user
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
