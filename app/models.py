@@ -41,3 +41,22 @@ class Order(Base):
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from datetime import datetime
+
+class Transaction(Base):
+    __tablename__ = "transactions"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    agent_id = Column(Integer, ForeignKey("users.id"))
+
+    customer_phone = Column(String)
+    network = Column(String)
+    data_plan = Column(String)
+
+    amount = Column(Float)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
