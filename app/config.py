@@ -11,5 +11,9 @@ class Settings:
     EVOS_MARGIN = float(os.getenv("EVOS_MARGIN", 0.50))
     AGENT_MIN_MARGIN = float(os.getenv("AGENT_MIN_MARGIN", 0.20))
     AGENT_MAX_MARGIN = float(os.getenv("AGENT_MAX_MARGIN", 5.00))
+    SECRET_KEY = "evos-super-secret-key-change-this"
+    ALGORITHM = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
 settings = Settings()
+
