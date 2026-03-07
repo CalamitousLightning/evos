@@ -6,7 +6,7 @@ from .auth import hash_password
 from .routes import auth_routes
 from .routes import founder_routes
 from .routes import order_routes
-
+from .routes import transaction_routes
 
 app = FastAPI(
     title="EVOS Data Services API",
@@ -20,7 +20,7 @@ Base.metadata.create_all(bind=engine)
 app.include_router(auth_routes.router)
 app.include_router(founder_routes.router)
 app.include_router(order_routes.router)
-
+app.include_router(transaction_routes.router)
 
 def create_founder():
     db: Session = SessionLocal()
