@@ -35,3 +35,21 @@ def get_agent_orders(agent_id: int, db: Session = Depends(get_db)):
     orders = db.query(Order).filter(Order.agent_id == agent_id).all()
 
     return orders
+
+
+@router.post("/update-status/{order_id}")
+def update_order_status(
+    order_id: int,
+    status: str,
+    db: Session = Depends(get_db)
+):
+
+    order = db.query(Order).filter(Order.id == order_id).first()
+
+    if not order:
+        return {"error": "Order not found"}
+
+    order.status = status
+    db.commit()
+
+    return {"message": "Order status updated", "status": status}
