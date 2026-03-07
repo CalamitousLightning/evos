@@ -40,3 +40,18 @@ def create_transaction(
         "message": "Transaction recorded",
         "transaction_id": transaction.id
     }
+
+
+@router.get("/my-sales")
+def get_my_sales(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+
+    transactions = db.query(Transaction).filter(
+        Transaction.agent_id == current_user.id
+    ).all()
+
+    return transactions
+
+
