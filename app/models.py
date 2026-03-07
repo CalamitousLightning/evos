@@ -16,4 +16,28 @@ class User(Base):
 
     invited_by = Column(String, nullable=True)
 
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy.orm import relationship
+
+class Order(Base):
+
+    __tablename__ = "orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    agent_id = Column(Integer, ForeignKey("users.id"))
+
+    customer_phone = Column(String)
+
+    network = Column(String)
+
+    bundle = Column(String)
+
+    amount = Column(Float)
+
+    status = Column(String, default="pending")
+
+    agent = relationship("User")
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
