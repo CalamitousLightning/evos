@@ -5,6 +5,7 @@ from .database import engine, Base, SessionLocal
 from .models import User
 from .auth import hash_password
 from .routes import auth_routes
+from .routes import founder_routes
 
 app = FastAPI(
     title="EVOS Data Services API",
@@ -16,7 +17,7 @@ Base.metadata.create_all(bind=engine)
 
 # Register routes
 app.include_router(auth_routes.router)
-
+app.include_router(founder_routes.router)
 
 def create_founder():
     db: Session = SessionLocal()
