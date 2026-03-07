@@ -51,3 +51,29 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         "role": db_user.role,
         "username": db_user.username
     }
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models import User
+from app.auth import hash_password
+
+router = APIRouter(prefix="/auth")
+
+@router.post("/register")
+def register(username: str, full_name: str, phone: str, password: str, invited_by: str = None, db: Session = Depends(get_db)):
+
+    user = User(
+        username=username,
+        full_name=full_name,
+        phone=phone,
+        password_hash=hash_password(password),
+        role="agent",
+        status="pending",
+        invited_by=invited_by
+    )
+
+    db.add(user)
+    db.commit()
+
+    return {"message": "Registration successful. Await founder approval."}
