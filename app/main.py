@@ -8,7 +8,7 @@ from .routes import founder_routes
 from .routes import order_routes
 from .routes import transaction_routes
 from .routes import admin_routes
-
+from .routes import wallet_routes
 
 
 app = FastAPI(
@@ -25,7 +25,7 @@ app.include_router(founder_routes.router)
 app.include_router(order_routes.router)
 app.include_router(transaction_routes.router)
 app.include_router(admin_routes.router)
-
+app.include_router(wallet_routes.router)
 
 
 def create_founder():
