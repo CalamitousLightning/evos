@@ -53,3 +53,31 @@ def get_platform_analytics(
         "total_transactions": total_transactions,
         "total_revenue": total_revenue
     }
+
+@router.post("/approve-withdrawal/{withdrawal_id}")
+def approve_withdrawal(
+    withdrawal_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+
+    if current_user.role not in ["founder", "admin"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    withdrawal = db.query(Withdrawal).filter(
+        Withdrawal.id == withdrawal_id
+    ).first()
+
+    if not withdrawal:
+        raise HTTPException(status_code=404, detail="Withdrawal not found")
+
+    wallet = db.query(Wallet).filter(
+        Wallet.user_id == withdrawal.user_id
+    ).first()
+
+    wallet.balance -= withdrawal.amount
+    withdrawal.status = "approved"
+
+    db.commit()
+
+    return {"message": "Withdrawal approved"}
