@@ -96,3 +96,27 @@ def get_withdrawals(
     withdrawals = db.query(Withdrawal).all()
 
     return withdrawals
+
+
+@router.post("/update-transaction/{transaction_id}")
+def update_transaction_status(
+    transaction_id: int,
+    status: str,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+
+    if current_user.role not in ["admin", "founder"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    transaction = db.query(Transaction).filter(
+        Transaction.id == transaction_id
+    ).first()
+
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+
+    transaction.status = status
+    db.commit()
+
+    return {"message": "Transaction status updated"}
