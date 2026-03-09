@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Request
 from sqlalchemy.orm import Session
 from ..models import Transaction, Wallet
 from ..database import SessionLocal
@@ -60,10 +61,8 @@ def create_transaction(
         data.data_plan
     )
 
-    if success:
-        transaction.status = "successful"
-    else:
-        transaction.status = "failed"
+    if not success:
+       transaction.status = "failed"
 
     db.commit()
 
@@ -111,4 +110,26 @@ def get_my_sales(
 
     return transactions
 
+@router.post("/provider-webhook")
+async def provider_webhook(request: Request, db: Session = Depends(get_db)):
 
+    payload = await request.json()
+
+    reference = payload.get("transaction_reference")
+    status = payload.get("status")
+
+    transaction = db.query(Transaction).filter(
+        Transaction.transaction_reference == reference
+    ).first()
+
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+
+    if status == "successful":
+        transaction.status = "successful"
+    else:
+        transaction.status = "failed"
+
+    db.commit()
+
+    return {"message": "Webhook processed"}
