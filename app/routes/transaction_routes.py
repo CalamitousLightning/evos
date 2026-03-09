@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from ..models import Transaction, Wallet
 from ..database import SessionLocal
 from ..schemas import TransactionCreate
+from ..services.provider_service import purchase_data
 from ..auth import get_current_user
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
@@ -48,8 +49,24 @@ def create_transaction(
     db.add(transaction)
     db.commit()
     db.refresh(transaction)
+    db.add(transaction)
+
+success = purchase_data(
+    data.customer_phone,
+    data.network,
+    data.data_plan
+)
+
+if success:
+    transaction.status = "successful"
+else:
+    transaction.status = "failed"
+
+db.commit()
 
     # Commission calculation
+    if success:
+
     commission_rate = 0.20
     commission = transaction.amount * commission_rate
 
