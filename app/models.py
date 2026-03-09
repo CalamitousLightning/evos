@@ -56,6 +56,7 @@ class Transaction(Base):
     customer_phone = Column(String)
     network = Column(String)
     data_plan = Column(String)
+    status = Column(String, default="pending")
 
     amount = Column(Float)
 
