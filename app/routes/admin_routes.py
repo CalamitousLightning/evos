@@ -4,7 +4,7 @@ from ..models import Withdrawal
 from ..database import SessionLocal
 from ..models import Transaction, User
 from ..auth import get_current_user
-
+from sqlalchemy import func
 from ..models import Transaction, User
 from ..auth import get_current_user
 from fastapi import HTTPException, Depends
@@ -120,3 +120,55 @@ def update_transaction_status(
     db.commit()
 
     return {"message": "Transaction status updated"}
+
+@router.get("/analytics/top-agents")
+def get_top_agents(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+
+    if current_user.role not in ["admin", "founder"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    results = db.query(
+        Transaction.agent_id,
+        func.sum(Transaction.amount).label("total_sales")
+    ).group_by(Transaction.agent_id).order_by(
+        func.sum(Transaction.amount).desc()
+    ).limit(5).all()
+
+    return results
+
+@router.get("/analytics/daily-revenue")
+def daily_revenue(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+
+    if current_user.role not in ["admin", "founder"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    results = db.query(
+        func.date(Transaction.created_at),
+        func.sum(Transaction.amount)
+    ).group_by(
+        func.date(Transaction.created_at)
+    ).all()
+
+    return results
+    
+@router.get("/analytics/network-usage")
+def network_usage(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+
+    if current_user.role not in ["admin", "founder"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    results = db.query(
+        Transaction.network,
+        func.count(Transaction.id)
+    ).group_by(Transaction.network).all()
+
+    return results
