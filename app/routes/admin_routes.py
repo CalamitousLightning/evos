@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-
+from ..models import Withdrawal
 from ..database import SessionLocal
 from ..models import Transaction, User
 from ..auth import get_current_user
@@ -81,3 +81,18 @@ def approve_withdrawal(
     db.commit()
 
     return {"message": "Withdrawal approved"}
+
+
+
+@router.get("/withdrawals")
+def get_withdrawals(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+
+    if current_user.role not in ["admin", "founder"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    withdrawals = db.query(Withdrawal).all()
+
+    return withdrawals
