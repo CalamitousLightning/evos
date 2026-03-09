@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..models import Transaction, Wallet
 from ..database import SessionLocal
-from ..models import Transaction
 from ..schemas import TransactionCreate
 from ..auth import get_current_user
 
@@ -21,9 +20,23 @@ def get_db():
 def create_transaction(
     data: TransactionCreate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user=Depends(get_current_user)
 ):
 
+    # Duplicate transaction protection
+    existing = db.query(Transaction).filter(
+        Transaction.customer_phone == data.customer_phone,
+        Transaction.data_plan == data.data_plan,
+        Transaction.amount == data.amount
+    ).first()
+
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="Duplicate transaction detected"
+        )
+
+    # Create transaction
     transaction = Transaction(
         agent_id=current_user.id,
         customer_phone=data.customer_phone,
@@ -55,24 +68,11 @@ def create_transaction(
 
     db.commit()
 
-    existing = db.query(Transaction).filter(
-    Transaction.customer_phone == data.customer_phone,
-    Transaction.data_plan == data.data_plan,
-    Transaction.amount == data.amount
-).first()
-
-if existing:
-    raise HTTPException(
-        status_code=400,
-        detail="Duplicate transaction detected"
-    )
-
     return {
         "message": "Transaction recorded",
         "transaction_id": transaction.id,
         "commission_earned": commission
     }
-
 
 @router.get("/my-sales")
 def get_my_sales(
