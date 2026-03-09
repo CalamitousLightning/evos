@@ -34,25 +34,61 @@ def get_all_transactions(
     return transactions
 
 
+
 @router.get("/analytics")
 def get_platform_analytics(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
 
     if current_user.role not in ["founder", "admin"]:
         raise HTTPException(status_code=403, detail="Not authorized")
 
+    # Total transactions
     total_transactions = db.query(Transaction).count()
 
-    transactions = db.query(Transaction).all()
+    # Total revenue
+    total_revenue = db.query(func.sum(Transaction.amount)).scalar() or 0
 
-    total_revenue = sum(t.amount for t in transactions)
+    # Successful transactions
+    successful_transactions = db.query(Transaction).filter(
+        Transaction.status == "successful"
+    ).count()
+
+    # Top agents by sales
+    top_agents = db.query(
+        Transaction.agent_id,
+        func.sum(Transaction.amount).label("total_sales")
+    ).group_by(Transaction.agent_id).order_by(
+        func.sum(Transaction.amount).desc()
+    ).limit(5).all()
+
+    # Network sales breakdown
+    network_sales = db.query(
+        Transaction.network,
+        func.sum(Transaction.amount).label("total_sales")
+    ).group_by(Transaction.network).all()
 
     return {
         "total_transactions": total_transactions,
-        "total_revenue": total_revenue
+        "total_revenue": total_revenue,
+        "successful_transactions": successful_transactions,
+        "top_agents": [
+            {
+                "agent_id": agent.agent_id,
+                "total_sales": agent.total_sales
+            }
+            for agent in top_agents
+        ],
+        "network_sales": [
+            {
+                "network": network.network,
+                "total_sales": network.total_sales
+            }
+            for network in network_sales
+        ]
     }
+
 
 @router.post("/approve-withdrawal/{withdrawal_id}")
 def approve_withdrawal(
