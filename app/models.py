@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, String, Float, DateTime
 from sqlalchemy import Column, Integer, Float, String, ForeignKey
 from sqlalchemy.sql import func
 from .database import Base
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy.orm import relationship
 class User(Base):
 
     __tablename__ = "users"
@@ -50,6 +52,7 @@ class Transaction(Base):
     __tablename__ = "transactions"
 
     id = Column(Integer, primary_key=True, index=True)
+    transaction_reference = Column(String, unique=True, index=True)
 
     agent_id = Column(Integer, ForeignKey("users.id"))
 
