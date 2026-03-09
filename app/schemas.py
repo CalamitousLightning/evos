@@ -31,3 +31,15 @@ class TransactionResponse(BaseModel):
 
     class Config:
         from_attributes = True
+        
+class TransactionResponse(BaseModel):
+    id: int
+    transaction_reference: str
+    customer_phone: str
+    network: str
+    data_plan: str
+    amount: float
+    status: str
+
+    class Config:
+        orm_mode = True
