@@ -1,4 +1,10 @@
 from pydantic import BaseModel
+from datetime import datetime
+
+
+# -------------------------
+# USER SCHEMAS
+# -------------------------
 
 class UserCreate(BaseModel):
     username: str
@@ -6,13 +12,15 @@ class UserCreate(BaseModel):
     phone: str
     password: str
 
+
 class UserLogin(BaseModel):
     username: str
     password: str
 
-from pydantic import BaseModel
-from datetime import datetime
 
+# -------------------------
+# TRANSACTION SCHEMAS
+# -------------------------
 
 class TransactionCreate(BaseModel):
     customer_phone: str
@@ -23,23 +31,13 @@ class TransactionCreate(BaseModel):
 
 class TransactionResponse(BaseModel):
     id: int
-    customer_phone: str
-    network: str
-    data_plan: str
-    amount: float
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-        
-class TransactionResponse(BaseModel):
-    id: int
     transaction_reference: str
     customer_phone: str
     network: str
     data_plan: str
     amount: float
     status: str
+    created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
