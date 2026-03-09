@@ -43,54 +43,60 @@ def create_transaction(
         customer_phone=data.customer_phone,
         network=data.network,
         data_plan=data.data_plan,
-        amount=data.amount
+        amount=data.amount,
+        status="pending"
     )
 
     db.add(transaction)
     db.commit()
     db.refresh(transaction)
-    db.add(transaction)
 
-success = purchase_data(
-    data.customer_phone,
-    data.network,
-    data.data_plan
-)
+    # Call provider API
+    success = purchase_data(
+        data.customer_phone,
+        data.network,
+        data.data_plan
+    )
 
-if success:
-    transaction.status = "successful"
-else:
-    transaction.status = "failed"
+    if success:
+        transaction.status = "successful"
+    else:
+        transaction.status = "failed"
 
-db.commit()
+    db.commit()
 
     # Commission calculation
     if success:
 
-    commission_rate = 0.20
-    commission = transaction.amount * commission_rate
+        commission_rate = 0.20
+        commission = transaction.amount * commission_rate
 
-    wallet = db.query(Wallet).filter(
-        Wallet.user_id == transaction.agent_id
-    ).first()
+        wallet = db.query(Wallet).filter(
+            Wallet.user_id == transaction.agent_id
+        ).first()
 
-    if not wallet:
-        wallet = Wallet(user_id=transaction.agent_id, balance=0)
-        db.add(wallet)
+        if not wallet:
+            wallet = Wallet(user_id=transaction.agent_id, balance=0)
+            db.add(wallet)
+            db.commit()
+            db.refresh(wallet)
+
+        wallet.balance += commission
+        wallet.total_commission += commission
+
         db.commit()
-        db.refresh(wallet)
 
-    wallet.balance += commission
-    wallet.total_commission += commission
-
-    db.commit()
+        return {
+            "message": "Transaction successful",
+            "transaction_id": transaction.id,
+            "commission_earned": commission
+        }
 
     return {
-        "message": "Transaction recorded",
-        "transaction_id": transaction.id,
-        "commission_earned": commission
+        "message": "Transaction failed",
+        "transaction_id": transaction.id
     }
-
+    
 @router.get("/my-sales")
 def get_my_sales(
     db: Session = Depends(get_db),
