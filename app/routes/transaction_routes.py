@@ -5,6 +5,8 @@ from ..database import SessionLocal
 from ..schemas import TransactionCreate
 from ..services.provider_service import purchase_data
 from ..auth import get_current_user
+import uuid
+
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
 
@@ -39,14 +41,14 @@ def create_transaction(
 
     # Create transaction
     transaction = Transaction(
-        agent_id=current_user.id,
-        customer_phone=data.customer_phone,
-        network=data.network,
-        data_plan=data.data_plan,
-        amount=data.amount,
-        status="pending"
-    )
-
+    transaction_reference=str(uuid.uuid4()),
+    agent_id=current_user.id,
+    customer_phone=data.customer_phone,
+    network=data.network,
+    data_plan=data.data_plan,
+    amount=data.amount,
+    status="pending"
+)
     db.add(transaction)
     db.commit()
     db.refresh(transaction)
@@ -87,10 +89,10 @@ def create_transaction(
         db.commit()
 
         return {
-            "message": "Transaction successful",
-            "transaction_id": transaction.id,
-            "commission_earned": commission
-        }
+    "message": "Transaction successful",
+    "transaction_reference": transaction.transaction_reference,
+    "commission_earned": commission
+}
 
     return {
         "message": "Transaction failed",
