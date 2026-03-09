@@ -48,8 +48,12 @@ def get_platform_analytics(
     total_transactions = db.query(Transaction).count()
 
     # Total revenue
-    total_revenue = db.query(func.sum(Transaction.amount)).scalar() or 0
-
+    total_revenue = db.query(
+    func.sum(Transaction.amount)
+).filter(
+    Transaction.status == "successful"
+).scalar() or 0
+    
     # Successful transactions
     successful_transactions = db.query(Transaction).filter(
         Transaction.status == "successful"
@@ -57,11 +61,13 @@ def get_platform_analytics(
 
     # Top agents by sales
     top_agents = db.query(
-        Transaction.agent_id,
-        func.sum(Transaction.amount).label("total_sales")
-    ).group_by(Transaction.agent_id).order_by(
-        func.sum(Transaction.amount).desc()
-    ).limit(5).all()
+    Transaction.agent_id,
+    func.sum(Transaction.amount).label("total_sales")
+).filter(
+    Transaction.status == "successful"
+).group_by(Transaction.agent_id).order_by(
+    func.sum(Transaction.amount).desc()
+).limit(5).all()
 
     # Network sales breakdown
     network_sales = db.query(
