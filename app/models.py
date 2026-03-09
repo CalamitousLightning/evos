@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
+from sqlalchemy import Column, Integer, Float, String, ForeignKey
 from sqlalchemy.sql import func
 from .database import Base
 class User(Base):
@@ -68,4 +69,10 @@ class Wallet(Base):
     balance = Column(Float, default=0.0)
     total_commission = Column(Float, default=0.0)
 
+class Withdrawal(Base):
+    __tablename__ = "withdrawals"
 
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    amount = Column(Float)
+    status = Column(String, default="pending")
