@@ -55,6 +55,18 @@ def create_transaction(
 
     db.commit()
 
+    existing = db.query(Transaction).filter(
+    Transaction.customer_phone == data.customer_phone,
+    Transaction.data_plan == data.data_plan,
+    Transaction.amount == data.amount
+).first()
+
+if existing:
+    raise HTTPException(
+        status_code=400,
+        detail="Duplicate transaction detected"
+    )
+
     return {
         "message": "Transaction recorded",
         "transaction_id": transaction.id,
