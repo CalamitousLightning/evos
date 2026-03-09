@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import Wallet, User
+from ..models import Wallet, Withdrawal, User
 from ..auth import get_current_user
 
 router = APIRouter(prefix="/wallet", tags=["Wallet"])
+
 
 @router.get("/me")
 def get_my_wallet(
@@ -23,29 +24,12 @@ def get_my_wallet(
 
     return wallet
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-
-from ..database import SessionLocal
-from ..models import Wallet, Withdrawal
-from ..auth import get_current_user
-
-router = APIRouter(prefix="/wallet", tags=["Wallet"])
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 
 @router.post("/withdraw")
 def request_withdrawal(
     amount: float,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
 
     wallet = db.query(Wallet).filter(Wallet.user_id == current_user.id).first()
