@@ -9,6 +9,11 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import User
 from app.auth import hash_password
+from slowapi.util import get_remote_address
+from slowapi import Limiter
+from fastapi import Request
+from ..main import limiter
+
 
 router = APIRouter(prefix="/auth")
 
@@ -40,6 +45,7 @@ from ..schemas import UserLogin
 from ..auth import verify_password
 
 @router.post("/login")
+@limiter.limit("5/minute")
 def login(user: UserLogin, db: Session = Depends(get_db)):
 
     db_user = db.query(User).filter(User.username == user.username).first()
@@ -61,6 +67,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 
 
 @router.post("/register")
+@limiter.limit("3/minute")
 def register(username: str, full_name: str, phone: str, password: str, invited_by: str = None, db: Session = Depends(get_db)):
 
     user = User(
