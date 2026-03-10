@@ -17,13 +17,26 @@ from slowapi.middleware import SlowAP
 
 
 
+
+limiter = Limiter(key_func=get_remote_address)
+
+
 app = FastAPI(
     title="EVOS Data Services API",
     version="1.0"
 )
+app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
+
+
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
+
+
+
+
+
 
 # Register routes
 app.include_router(auth_routes.router)
@@ -33,6 +46,9 @@ app.include_router(transaction_routes.router)
 app.include_router(admin_routes.router)
 app.include_router(wallet_routes.router)
 app.include_router(provider_routes.router)
+
+
+
 
 def create_founder():
     db: Session = SessionLocal()
