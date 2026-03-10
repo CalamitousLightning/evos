@@ -6,6 +6,8 @@ from ..database import SessionLocal
 from ..schemas import TransactionCreate
 from ..services.provider_service import purchase_data
 from ..auth import get_current_user
+from ..main import limiter
+from fastapi import Request
 import uuid
 
 
@@ -21,8 +23,10 @@ def get_db():
 
 
 @router.post("/create")
+@limiter.limit("20/minute")
 def create_transaction(
     data: TransactionCreate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
