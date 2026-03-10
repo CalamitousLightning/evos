@@ -10,6 +10,12 @@ from .routes import transaction_routes
 from .routes import admin_routes
 from .routes import wallet_routes
 from .routes import provider_routes
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAP
+
+
 
 app = FastAPI(
     title="EVOS Data Services API",
