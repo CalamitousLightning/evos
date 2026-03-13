@@ -10,6 +10,7 @@ from .routes import transaction_routes
 from .routes import admin_routes
 from .routes import wallet_routes
 from .routes import provider_routes
+from .limiter import limiter
 
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAP
