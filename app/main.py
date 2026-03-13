@@ -13,7 +13,7 @@ from .routes import provider_routes
 from .limiter import limiter
 
 from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAP
+from slowapi.middleware import SlowAPMiddleware
 
 
 app = FastAPI(
