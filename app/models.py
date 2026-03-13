@@ -1,9 +1,11 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime
-from sqlalchemy import Column, Integer, Float, String, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
 from sqlalchemy.sql import func
-from .database import Base
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
+from datetime import datetime
+
+from .database import Base
+
+
 class User(Base):
 
     __tablename__ = "users"
@@ -19,8 +21,7 @@ class User(Base):
 
     invited_by = Column(String, nullable=True)
 
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
-from sqlalchemy.orm import relationship
+
 
 class Order(Base):
 
@@ -45,8 +46,6 @@ class Order(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
-from datetime import datetime
 
 class Transaction(Base):
     __tablename__ = "transactions"
@@ -80,3 +79,22 @@ class Withdrawal(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     amount = Column(Float)
     status = Column(String, default="pending")
+
+class WalletLedger(Base):
+
+    __tablename__ = "wallet_ledger"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(Integer, ForeignKey("users.id"))
+
+    transaction_type = Column(String)  
+    # deposit, purchase, commission, withdrawal
+
+    amount = Column(Float)
+
+    reference = Column(String)
+
+    balance_after = Column(Float)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
