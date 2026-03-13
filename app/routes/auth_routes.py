@@ -1,23 +1,16 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from fastapi import Request
+
 from ..database import get_db
 from ..models import User
-from ..schemas import UserCreate
-from ..auth import hash_password
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from app.database import get_db
-from app.models import User
-from app.auth import hash_password
-from slowapi.util import get_remote_address
-from slowapi import Limiter
-from fastapi import Request
+from ..schemas import UserCreate, UserLogin
+from ..auth import hash_password, verify_password
 from ..limiter import limiter
 
 
 router = APIRouter(prefix="/auth")
 
-router = APIRouter()
 
 @router.post("/apply-agent")
 def apply_agent(user: UserCreate, db: Session = Depends(get_db)):
@@ -41,12 +34,9 @@ def apply_agent(user: UserCreate, db: Session = Depends(get_db)):
     return {"message": "Application submitted. Await founder approval."}
 
 
-from ..schemas import UserLogin
-from ..auth import verify_password
-
 @router.post("/login")
 @limiter.limit("5/minute")
-def login(user: UserLogin, db: Session = Depends(get_db)):
+def login(request: Request, user: UserLogin, db: Session = Depends(get_db)):
 
     db_user = db.query(User).filter(User.username == user.username).first()
 
@@ -68,7 +58,15 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 
 @router.post("/register")
 @limiter.limit("3/minute")
-def register(username: str, full_name: str, phone: str, password: str, invited_by: str = None, db: Session = Depends(get_db)):
+def register(
+    request: Request,
+    username: str,
+    full_name: str,
+    phone: str,
+    password: str,
+    invited_by: str = None,
+    db: Session = Depends(get_db)
+):
 
     user = User(
         username=username,
