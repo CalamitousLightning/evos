@@ -12,7 +12,7 @@ from app.auth import hash_password
 from slowapi.util import get_remote_address
 from slowapi import Limiter
 from fastapi import Request
-from ..main import limiter
+from ..limiter import limiter
 
 
 router = APIRouter(prefix="/auth")
