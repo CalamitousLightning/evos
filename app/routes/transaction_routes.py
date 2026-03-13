@@ -6,7 +6,7 @@ from ..database import SessionLocal
 from ..schemas import TransactionCreate
 from ..services.provider_service import purchase_data
 from ..auth import get_current_user
-from ..main import limiter
+from ..limiter import limiter
 from fastapi import Request
 import uuid
 
