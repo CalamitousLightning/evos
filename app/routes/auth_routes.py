@@ -33,7 +33,6 @@ def apply_agent(user: UserCreate, db: Session = Depends(get_db)):
 
     return {"message": "Application submitted. Await founder approval."}
 
-
 @router.post("/login")
 @limiter.limit("5/minute")
 def login(request: Request, user: UserLogin, db: Session = Depends(get_db)):
@@ -46,13 +45,13 @@ def login(request: Request, user: UserLogin, db: Session = Depends(get_db)):
     if not verify_password(user.password, db_user.password_hash):
         return {"error": "Invalid credentials"}
 
-    if db_user.status != "active":
-        return {"error": "Account not approved yet"}
-
+    # ✅ RETURN REAL DATA (DO NOT BLOCK LOGIN HERE)
     return {
         "message": "Login successful",
         "role": db_user.role,
-        "username": db_user.username
+        "username": db_user.username,
+        "user_id": db_user.id,
+        "status": db_user.status   # 🔥 THIS FIXES EVERYTHING
     }
 
 
