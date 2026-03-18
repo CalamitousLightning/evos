@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from .database import engine, Base, SessionLocal
 from .models import User
@@ -10,28 +11,34 @@ from .routes import transaction_routes
 from .routes import admin_routes
 from .routes import wallet_routes
 from .routes import provider_routes
-from .limiter import limiter
 
-from slowapi.errors import RateLimitExceeded
+# ✅ KEEP THIS VERSION (clean + correct)
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from slowapi.middleware import SlowAPIMiddleware
 
+limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(
     title="EVOS Data Services API",
     version="1.0"
 )
+
+# ✅ RATE LIMITER
 app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
 
-
+# ✅ CORS FIX (MAIN FIX)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
-
-
-
-
-
 
 # Register routes
 app.include_router(auth_routes.router)
@@ -41,8 +48,6 @@ app.include_router(transaction_routes.router)
 app.include_router(admin_routes.router)
 app.include_router(wallet_routes.router)
 app.include_router(provider_routes.router)
-
-
 
 
 def create_founder():
@@ -68,7 +73,6 @@ def create_founder():
         db.close()
 
 
-# Run founder creation when server starts
 @app.on_event("startup")
 def startup_event():
     create_founder()
