@@ -12,14 +12,16 @@ const fetchAgents = async () => {
 try{
 const res = await fetch("https://evo-zobs.onrender.com/founder/pending-agents",{
 headers:{
-"Authorization":`Bearer ${token}`
+"Authorization": token ? `Bearer ${token}` : ""
 }
 })
 
 const data = await res.json()
+console.log("AGENTS:", data) // 🔥 DEBUG
+
 setAgents(data)
 }catch(err){
-console.log(err)
+console.log("ERROR:", err)
 }
 setLoading(false)
 }
@@ -30,7 +32,7 @@ try{
 await fetch(`https://evo-zobs.onrender.com/founder/approve-agent/${id}`,{
 method:"POST",
 headers:{
-"Authorization":`Bearer ${token}`
+"Authorization": token ? `Bearer ${token}` : ""
 }
 })
 
@@ -63,9 +65,13 @@ return(
 ) : (
 
 agents.map((agent)=>(
-<div key={agent.id} className="border p-4 mb-3 flex justify-between">
+<div key={agent.id} className="border p-4 mb-3 flex justify-between items-center">
 
-<span>{agent.email}</span>
+<div>
+<p><b>Username:</b> {agent.username}</p>
+<p><b>Full Name:</b> {agent.full_name}</p>
+<p><b>Phone:</b> {agent.phone}</p>
+</div>
 
 <button
 className="bg-green-600 text-white px-4 py-1 rounded"

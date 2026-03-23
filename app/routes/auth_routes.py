@@ -54,7 +54,6 @@ def login(request: Request, user: UserLogin, db: Session = Depends(get_db)):
         "status": db_user.status   # 🔥 THIS FIXES EVERYTHING
     }
 
-
 @router.post("/register")
 @limiter.limit("3/minute")
 def register(

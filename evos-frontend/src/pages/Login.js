@@ -5,7 +5,7 @@ export default function Login(){
 
 const navigate = useNavigate()
 
-const [email,setEmail] = useState("")
+const [username,setUsername] = useState("")
 const [password,setPassword] = useState("")
 const [error,setError] = useState("")
 const [loading,setLoading] = useState(false)
@@ -23,15 +23,16 @@ headers:{
 "Content-Type":"application/json"
 },
 body:JSON.stringify({
-email,
+username,
 password
 })
 })
 
 const data = await res.json()
 
+// ❌ HANDLE BACKEND ERRORS PROPERLY
 if(!res.ok){
-setError(data.detail || "Invalid credentials")
+setError(data.detail?.[0]?.msg || data.detail || "Invalid credentials")
 setLoading(false)
 return
 }
@@ -41,8 +42,8 @@ localStorage.setItem("token", data.access_token)
 localStorage.setItem("role", data.role)
 localStorage.setItem("user_id", data.user_id)
 
-// 🚫 Check approval (VERY IMPORTANT)
-if(data.role === "agent" && data.is_approved === false){
+// 🚫 Check approval (based on status)
+if(data.role === "agent" && data.status !== "active"){
 setError("Your account is pending founder approval")
 setLoading(false)
 return
@@ -83,8 +84,8 @@ EVOS Login
 
 <input
 className="border p-2 w-full mb-3 rounded"
-placeholder="Email"
-onChange={(e)=>setEmail(e.target.value)}
+placeholder="Username"
+onChange={(e)=>setUsername(e.target.value)}
 />
 
 <input

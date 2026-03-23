@@ -17,7 +17,18 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
+#-------------------------
+# ORDER SCHEMAS
+#-------------------------
 
+class OrderCreate(BaseModel):
+    agent_id: int
+    customer_phone: str
+    network: str
+    bundle: str
+    amount: float
+
+    
 # -------------------------
 # TRANSACTION SCHEMAS
 # -------------------------
