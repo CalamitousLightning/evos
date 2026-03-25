@@ -1,29 +1,36 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Order
+from app.models import Order, User
 from app.schemas import OrderCreate
 
 
 router = APIRouter(prefix="/orders", tags=["Orders"])
 
 
-
 @router.post("/create")
-def create_order(transaction: TransactionCreate, db: Session = Depends(get_db)):
+def create_order(data: dict, db: Session = Depends(get_db)):
+
+    # 🔥 find agent by username
+    agent = db.query(User).filter(User.username == data.get("agent_username")).first()
+
+    if not agent:
+        return {"error": "Agent not found"}
 
     order = Order(
-        agent_id=transaction.agent_id,
-        customer_phone=transaction.customer_phone,
-        network=transaction.network,
-        bundle=transaction.data_plan,   # or rename column
-        amount=transaction.amount
+        agent_id=agent.id,
+        customer_phone=data.get("customer_phone"),
+        network=data.get("network"),
+        bundle=data.get("bundle"),
+        amount=data.get("amount"),
+        status="pending"
     )
 
     db.add(order)
     db.commit()
 
-    return {"message": "Order created successfully"}"}
+    return {"message": "Order created successfully"}
+
 
 @router.get("/agent/{agent_id}")
 def get_agent_orders(agent_id: int, db: Session = Depends(get_db)):
