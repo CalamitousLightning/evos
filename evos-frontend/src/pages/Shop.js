@@ -12,7 +12,7 @@ const [message,setMessage] = useState("")
 const [loading,setLoading] = useState(false)
 
 // 🔥 YOUR PAYSTACK KEY HERE
-const PAYSTACK_KEY = "YOUR_PAYSTACK_PUBLIC_KEY"
+const PAYSTACK_KEY = "pk_test_96ebff2c005c164726c96b7cebbd2efbffede456"
 
 const handleBuy = () => {
 
