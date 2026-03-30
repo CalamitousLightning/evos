@@ -2,146 +2,165 @@ import { useEffect, useState } from "react"
 
 export default function Dashboard(){
 
-  const [data,setData] = useState(null)
-  const [loading,setLoading] = useState(true)
+const [data,setData] = useState(null)
+const [loading,setLoading] = useState(true)
 
-  const agentId = localStorage.getItem("agent_id")
+const agentId = localStorage.getItem("agent_id")
+const username = localStorage.getItem("username") || "agent"
 
-  const fetchDashboard = async () => {
-    try{
-      const res = await fetch(`https://evo-zobs.onrender.com/orders/agent-dashboard/${agentId}`)
-      const result = await res.json()
-      setData(result)
-    }catch(err){
-      console.log(err)
-    }
-    setLoading(false)
-  }
+const fetchDashboard = async () => {
 
-  useEffect(()=>{
-    fetchDashboard()
-    // eslint-disable-next-line
-  },[])
+try{
 
-  return(
+const res = await fetch(`https://evo-zobs.onrender.com/orders/agent-dashboard/${agentId}`)
+const result = await res.json()
 
-    <div className="flex min-h-screen">
+setData(result)
 
-      {/* 🔹 SIDEBAR */}
-      <div className="w-64 bg-gray-900 text-white p-5">
-        <h2 className="text-xl font-bold mb-6">EVOS</h2>
+}catch(err){
+console.log(err)
+}
 
-        <ul className="space-y-4">
-          <li>Dashboard</li>
-          <li>My Shop</li>
-          <li>Edit Prices</li>
-          <li>Orders</li>
-          <li>Earnings</li>
-          <li>Withdraw</li>
-          <li>Apply for Admin</li>
-        </ul>
-      </div>
+setLoading(false)
 
-      {/* 🔹 MAIN */}
-      <div className="flex-1 p-8 bg-gray-100">
+}
 
-        <h1 className="text-2xl font-bold mb-6">
-          Agent Dashboard
-        </h1>
+useEffect(()=>{
+fetchDashboard()
+// eslint-disable-next-line
+},[])
 
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
+return(
 
-          <>
-            {/* 🔥 TOP CARDS */}
-            <div className="grid grid-cols-3 gap-6 mb-6">
+<div className="flex min-h-screen">
 
-              <div className="bg-white p-5 rounded shadow">
-                <h2>Wallet</h2>
-                <p className="text-xl font-bold">
-                  GHS {data.earnings}
-                </p>
-              </div>
+{/* 🔹 SIDEBAR */}
+<div className="w-64 bg-gray-900 text-white p-5">
+<h2 className="text-xl font-bold mb-6">EVOS</h2>
 
-              <div className="bg-white p-5 rounded shadow">
-                <h2>Total Orders</h2>
-                <p className="text-xl font-bold">
-                  {data.total_orders}
-                </p>
-              </div>
+<ul className="space-y-4">
+<li className="font-bold">Dashboard</li>
+<li>My Shop</li>
+<li>Edit Prices</li>
+<li>Orders</li>
+<li>Earnings</li>
+<li>Withdraw</li>
+<li>Apply for Admin</li>
+</ul>
+</div>
 
-              <div className="bg-white p-5 rounded shadow">
-                <h2>Successful</h2>
-                <p className="text-xl font-bold">
-                  {data.successful_orders}
-                </p>
-              </div>
+{/* 🔹 MAIN */}
+<div className="flex-1 p-8 bg-gray-100">
 
-            </div>
+<h1 className="text-2xl font-bold mb-4">
+Agent Dashboard
+</h1>
 
-            {/* 🔥 SECOND ROW */}
-            <div className="grid grid-cols-2 gap-6 mb-6">
+{/* 🔥 SHOP LINK */}
+<div className="bg-white p-4 rounded shadow mb-6">
+<p className="text-sm text-gray-500">Your Shop Link</p>
+<p className="font-bold text-blue-600">
+https://evos-amqc.onrender.com/shop/{username}
+</p>
+</div>
 
-              <div className="bg-white p-5 rounded shadow">
-                <h2>Pending</h2>
-                <p className="text-xl font-bold">
-                  {data.pending_orders}
-                </p>
-              </div>
+{loading ? (
+<p>Loading...</p>
+) : (
 
-              <div className="bg-white p-5 rounded shadow">
-                <h2>Failed</h2>
-                <p className="text-xl font-bold">
-                  {data.failed_orders}
-                </p>
-              </div>
+<>
+{/* 🔥 TOP CARDS */}
+<div className="grid grid-cols-3 gap-6 mb-6">
 
-            </div>
+<div className="bg-white p-5 rounded shadow">
+<h2 className="text-sm text-gray-500">Wallet</h2>
+<p className="text-2xl font-bold">
+GHS {data.earnings}
+</p>
+</div>
 
-            {/* 🔥 ORDERS TABLE */}
-            <div className="mt-10 bg-white p-5 rounded shadow">
-              <h2 className="text-xl font-bold mb-4">Recent Orders</h2>
+<div className="bg-white p-5 rounded shadow">
+<h2 className="text-sm text-gray-500">Total Orders</h2>
+<p className="text-2xl font-bold">
+{data.total_orders}
+</p>
+</div>
 
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr>
-                    <th className="border-b p-2">Order ID</th>
-                    <th className="border-b p-2">Customer</th>
-                    <th className="border-b p-2">Bundle</th>
-                    <th className="border-b p-2">Amount</th>
-                    <th className="border-b p-2">Status</th>
-                    <th className="border-b p-2">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.orders && data.orders.length > 0 ? (
-                    data.orders.map(order => (
-                      <tr key={order.id}>
-                        <td className="border-b p-2">{order.id}</td>
-                        <td className="border-b p-2">{order.customer_name || order.customer_number}</td>
-                        <td className="border-b p-2">{order.bundle_name}</td>
-                        <td className="border-b p-2">GHS {order.amount}</td>
-                        <td className="border-b p-2">{order.status}</td>
-                        <td className="border-b p-2">{new Date(order.created_at).toLocaleString()}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" className="p-2 text-center">No orders yet</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+<div className="bg-white p-5 rounded shadow">
+<h2 className="text-sm text-gray-500">Successful</h2>
+<p className="text-2xl font-bold">
+{data.successful_orders}
+</p>
+</div>
 
-          </>
+</div>
 
-        )}
+{/* 🔥 SECOND ROW */}
+<div className="grid grid-cols-2 gap-6 mb-6">
 
-      </div>
+<div className="bg-white p-5 rounded shadow">
+<h2 className="text-sm text-gray-500">Pending</h2>
+<p className="text-2xl font-bold">
+{data.pending_orders}
+</p>
+</div>
 
-    </div>
+<div className="bg-white p-5 rounded shadow">
+<h2 className="text-sm text-gray-500">Failed</h2>
+<p className="text-2xl font-bold">
+{data.failed_orders}
+</p>
+</div>
 
-  )
+</div>
+
+{/* 🔥 ORDERS TABLE */}
+<div className="bg-white p-6 rounded shadow">
+
+<h2 className="text-lg font-bold mb-4">
+Recent Orders
+</h2>
+
+{data.total_orders === 0 ? (
+<p className="text-gray-500">No orders yet</p>
+) : (
+
+<table className="w-full border">
+
+<thead>
+<tr className="bg-gray-200 text-sm">
+<th className="p-2">Order ID</th>
+<th className="p-2">Customer</th>
+<th className="p-2">Bundle</th>
+<th className="p-2">Amount</th>
+<th className="p-2">Status</th>
+</tr>
+</thead>
+
+<tbody>
+{/* 🔥 Later we will map real orders */}
+<tr className="text-center border-t">
+<td className="p-2">---</td>
+<td className="p-2">---</td>
+<td className="p-2">---</td>
+<td className="p-2">---</td>
+<td className="p-2">---</td>
+</tr>
+</tbody>
+
+</table>
+
+)}
+
+</div>
+
+</>
+
+)}
+
+</div>
+
+</div>
+
+)
 }
