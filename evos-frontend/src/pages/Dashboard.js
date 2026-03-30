@@ -3,11 +3,13 @@ import { useEffect, useState } from "react"
 export default function Dashboard(){
 
 const [data,setData] = useState(null)
+const [orders,setOrders] = useState([])   // ✅ NEW
 const [loading,setLoading] = useState(true)
 
 const agentId = localStorage.getItem("agent_id")
 const username = localStorage.getItem("username") || "agent"
 
+// 🔹 FETCH DASHBOARD STATS
 const fetchDashboard = async () => {
 
 try{
@@ -21,12 +23,33 @@ setData(result)
 console.log(err)
 }
 
+}
+
+// 🔹 FETCH ORDERS (NEW)
+const fetchOrders = async () => {
+
+try{
+
+const res = await fetch(`https://evo-zobs.onrender.com/orders/agent/${agentId}`)
+const data = await res.json()
+
+if(Array.isArray(data)){
+setOrders(data)
+}else{
+setOrders([])
+}
+
+}catch(err){
+console.log(err)
+}
+
 setLoading(false)
 
 }
 
 useEffect(()=>{
 fetchDashboard()
+fetchOrders()
 // eslint-disable-next-line
 },[])
 
@@ -75,21 +98,21 @@ https://evos-amqc.onrender.com/shop/{username}
 <div className="bg-white p-5 rounded shadow">
 <h2 className="text-sm text-gray-500">Wallet</h2>
 <p className="text-2xl font-bold">
-GHS {data.earnings}
+GHS {data?.earnings || 0}
 </p>
 </div>
 
 <div className="bg-white p-5 rounded shadow">
 <h2 className="text-sm text-gray-500">Total Orders</h2>
 <p className="text-2xl font-bold">
-{data.total_orders}
+{data?.total_orders || 0}
 </p>
 </div>
 
 <div className="bg-white p-5 rounded shadow">
 <h2 className="text-sm text-gray-500">Successful</h2>
 <p className="text-2xl font-bold">
-{data.successful_orders}
+{data?.successful_orders || 0}
 </p>
 </div>
 
@@ -101,14 +124,14 @@ GHS {data.earnings}
 <div className="bg-white p-5 rounded shadow">
 <h2 className="text-sm text-gray-500">Pending</h2>
 <p className="text-2xl font-bold">
-{data.pending_orders}
+{data?.pending_orders || 0}
 </p>
 </div>
 
 <div className="bg-white p-5 rounded shadow">
 <h2 className="text-sm text-gray-500">Failed</h2>
 <p className="text-2xl font-bold">
-{data.failed_orders}
+{data?.failed_orders || 0}
 </p>
 </div>
 
@@ -120,10 +143,6 @@ GHS {data.earnings}
 <h2 className="text-lg font-bold mb-4">
 Recent Orders
 </h2>
-
-{data.total_orders === 0 ? (
-<p className="text-gray-500">No orders yet</p>
-) : (
 
 <table className="w-full border">
 
@@ -138,19 +157,32 @@ Recent Orders
 </thead>
 
 <tbody>
-{/* 🔥 Later we will map real orders */}
-<tr className="text-center border-t">
-<td className="p-2">---</td>
-<td className="p-2">---</td>
-<td className="p-2">---</td>
-<td className="p-2">---</td>
-<td className="p-2">---</td>
+{orders.length === 0 ? (
+
+<tr>
+<td colSpan="5" className="text-center p-4 text-gray-500">
+No orders yet
+</td>
 </tr>
+
+) : (
+
+orders.map((order)=>(
+<tr key={order.id} className="text-center border-t">
+
+<td className="p-2">{order.id}</td>
+<td className="p-2">{order.customer_phone}</td>
+<td className="p-2">{order.bundle}</td>
+<td className="p-2">GHS {order.amount}</td>
+<td className="p-2">{order.status}</td>
+
+</tr>
+))
+
+)}
 </tbody>
 
 </table>
-
-)}
 
 </div>
 
