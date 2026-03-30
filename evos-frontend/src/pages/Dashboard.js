@@ -2,88 +2,114 @@ import { useEffect, useState } from "react"
 
 export default function Dashboard(){
 
-const [orders,setOrders] = useState([])
+const [data,setData] = useState(null)
 const [loading,setLoading] = useState(true)
 
-const user_id = localStorage.getItem("user_id")
+const agentId = localStorage.getItem("agent_id")
 
-const fetchOrders = async () => {
+const fetchDashboard = async () => {
 
 try{
 
-const res = await fetch(`https://evo-zobs.onrender.com/orders/agent/${user_id}`)
-const data = await res.json()
+const res = await fetch(`https://evo-zobs.onrender.com/orders/agent-dashboard/${agentId}`)
+const result = await res.json()
 
-// ✅ VERY IMPORTANT FIX
-if(Array.isArray(data)){
-    setOrders(data)
-}else{
-    console.log("Not an array:", data)
-    setOrders([]) // prevent crash
-}
+setData(result)
 
 }catch(err){
 console.log(err)
-setOrders([])
 }
 
 setLoading(false)
+
 }
 
 useEffect(()=>{
-fetchOrders()
+fetchDashboard()
 // eslint-disable-next-line
 },[])
 
 return(
 
-<div className="p-10">
+<div className="flex min-h-screen">
 
-<h1 className="text-3xl font-bold mb-6">
-EVOS Agent Dashboard
+{/* 🔹 SIDEBAR */}
+<div className="w-64 bg-gray-900 text-white p-5">
+<h2 className="text-xl font-bold mb-6">EVOS</h2>
+
+<ul className="space-y-4">
+<li>Dashboard</li>
+<li>My Shop</li>
+<li>Edit Prices</li>
+<li>Orders</li>
+<li>Earnings</li>
+<li>Withdraw</li>
+<li>Apply for Admin</li>
+</ul>
+</div>
+
+{/* 🔹 MAIN */}
+<div className="flex-1 p-8 bg-gray-100">
+
+<h1 className="text-2xl font-bold mb-6">
+Agent Dashboard
 </h1>
 
 {loading ? (
 <p>Loading...</p>
 ) : (
 
-<div>
+<>
+{/* 🔥 TOP CARDS */}
+<div className="grid grid-cols-3 gap-6 mb-6">
 
-<h2 className="text-xl mb-4">My Orders</h2>
+<div className="bg-white p-5 rounded shadow">
+<h2>Wallet</h2>
+<p className="text-xl font-bold">
+GHS {data.earnings}
+</p>
+</div>
 
-{orders.length === 0 ? (
-<p>No orders yet</p>
-) : (
+<div className="bg-white p-5 rounded shadow">
+<h2>Total Orders</h2>
+<p className="text-xl font-bold">
+{data.total_orders}
+</p>
+</div>
 
-<table className="w-full border">
+<div className="bg-white p-5 rounded shadow">
+<h2>Successful</h2>
+<p className="text-xl font-bold">
+{data.successful_orders}
+</p>
+</div>
 
-<thead>
-<tr className="bg-gray-200">
-<th className="p-2">Phone</th>
-<th className="p-2">Network</th>
-<th className="p-2">Bundle</th>
-<th className="p-2">Status</th>
-</tr>
-</thead>
+</div>
 
-<tbody>
-{orders.map((order)=>(
-<tr key={order.id} className="text-center border-t">
-<td className="p-2">{order.customer_phone}</td>
-<td className="p-2">{order.network}</td>
-<td className="p-2">{order.bundle}</td>
-<td className="p-2">{order.status || "pending"}</td>
-</tr>
-))}
-</tbody>
+{/* 🔥 SECOND ROW */}
+<div className="grid grid-cols-2 gap-6">
 
-</table>
+<div className="bg-white p-5 rounded shadow">
+<h2>Pending</h2>
+<p className="text-xl font-bold">
+{data.pending_orders}
+</p>
+</div>
+
+<div className="bg-white p-5 rounded shadow">
+<h2>Failed</h2>
+<p className="text-xl font-bold">
+{data.failed_orders}
+</p>
+</div>
+
+</div>
+
+</>
 
 )}
 
 </div>
-
-)}
 
 </div>
 
