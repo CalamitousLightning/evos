@@ -6,6 +6,7 @@ import Founder from "./pages/Founder"
 import Admin from "./pages/Admin"
 import Register from "./pages/Register"
 import Shop from "./pages/Shop"
+import EditPrices from "./pages/EditPrices"
 
 export default function App(){
 
@@ -21,7 +22,7 @@ return(
 <Route path="/admin" element={<Admin />} />
 <Route path="/register" element={<Register />} />
 <Route path="/shop/:username" element={<Shop />} />
-
+<Route path="/edit-prices" element={<EditPrices />} />
 </Routes>
 
 </BrowserRouter>
