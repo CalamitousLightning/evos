@@ -22,7 +22,7 @@ return(
 <Route path="/admin" element={<Admin />} />
 <Route path="/register" element={<Register />} />
 <Route path="/shop/:username" element={<Shop />} />
-<Route path="/edit-prices" element={<EditPrices />} />
+<Route path="/editprices" element={<EditPrices />} />
 </Routes>
 
 </BrowserRouter>
